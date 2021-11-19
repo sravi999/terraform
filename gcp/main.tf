@@ -35,3 +35,13 @@ resource "google_compute_instance" "vm_instance" {
     }
   }
 }
+
+resource "google_compute_firewall" "vm_ssh_web" {
+  name    = "ssh-web-firewall"
+  network = google_compute_network.vpc_network.name
+  allow {
+    protocol = "tcp"
+    ports    = ["22", "80"]
+  }
+  source_tags = ["web"]
+}
