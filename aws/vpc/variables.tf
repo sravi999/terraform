@@ -47,3 +47,12 @@ variable "instances" {
     }
   }
 }
+
+variable "instance_tags" {
+  description = "Assign tag to instance using lookup function"
+  type        = map(any)
+  default = {
+    web_server  = "Apache"
+    environment = "dev"
+  }
+}

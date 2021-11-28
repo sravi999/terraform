@@ -57,7 +57,6 @@ resource "aws_security_group_rule" "ingress" {
   cidr_blocks       = var.ingress_cidr_block
   security_group_id = aws_security_group.allow_tls.id
 }
-
 resource "aws_security_group_rule" "egress" {
   type              = "egress"
   from_port         = 0
@@ -65,6 +64,29 @@ resource "aws_security_group_rule" "egress" {
   protocol          = "-1"
   cidr_blocks       = var.egress_cidr_block
   security_group_id = aws_security_group.allow_tls.id
+}
+resource "aws_security_group" "allow_ssh" {
+  name        = "allow_ssh"
+  description = "Allow SSH access to VM"
+  vpc_id      = aws_vpc.vpc.id
+}
+
+resource "aws_security_group_rule" "ssh_ingress" {
+  type              = "ingress"
+  from_port         = 22
+  to_port           = 22
+  protocol          = "tcp"
+  cidr_blocks       = var.ingress_cidr_block
+  security_group_id = aws_security_group.allow_ssh.id
+}
+
+resource "aws_security_group_rule" "ssh_egress" {
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = var.egress_cidr_block
+  security_group_id = aws_security_group.allow_ssh.id
 }
 
 resource "aws_network_acl" "network_acl" {
@@ -95,5 +117,5 @@ resource "aws_network_acl_rule" "egress" {
 
 resource "aws_network_interface" "subnet_association" {
   subnet_id       = aws_subnet.subnet.id
-  security_groups = [aws_security_group.allow_tls.id]
+  security_groups = [aws_security_group.allow_tls.id, aws_security_group.allow_ssh.id]
 }
