@@ -36,3 +36,14 @@ variable "egress_cidr_block" {
   type        = list(string)
   default     = ["0.0.0.0/0"]
 }
+
+variable "instances" {
+  description = "Instance configuration"
+  type        = map(any)
+  default = {
+    instance = {
+      instance_type = "t2.micro",
+      environment   = "dev"
+    }
+  }
+}

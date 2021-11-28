@@ -8,9 +8,11 @@ data "aws_ami" "amis" {
 }
 
 resource "aws_instance" "instance" {
+
   ami           = data.aws_ami.amis.id
-  instance_type = "t2.micro"
-  #  associate_public_ip_address = true
+  for_each      = var.instances
+  instance_type = each.value.instance_type
+  tags          = each.value
   network_interface {
     network_interface_id = aws_network_interface.subnet_association.id
     device_index         = 0
@@ -23,6 +25,7 @@ EOF
 }
 
 resource "aws_eip" "lb" {
-  instance = aws_instance.instance.id
+  for_each = var.instances
+  instance = aws_instance.instance[each.key].id
   vpc      = true
 }

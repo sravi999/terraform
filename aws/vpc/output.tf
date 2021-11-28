@@ -5,5 +5,5 @@ output "vpc_id" {
 
 output "instance_public_ip" {
   description = "Instance public ip"
-  value       = aws_instance.instance.public_ip
+  value       = { for key in keys(var.instances) : key => aws_eip.lb[key].public_ip }
 }
