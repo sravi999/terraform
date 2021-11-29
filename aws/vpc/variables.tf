@@ -14,7 +14,7 @@ variable "vpc_tags" {
   description = "VPC tags"
   type        = map(any)
   default = {
-    name  = "my_vpc"
+    name  = ""
     owner = "ravi"
   }
 }

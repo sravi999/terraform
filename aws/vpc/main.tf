@@ -7,13 +7,24 @@ terraform {
   }
 }
 
+locals {
+  name   = (var.vpc_tags["name"] != "" ? var.vpc_tags["name"] : "VPC-${var.region}")
+  owner  = var.vpc_tags["owner"]
+  region = var.region
+  common_tags = {
+    Owner  = local.owner
+    Name   = local.name
+    Region = local.region
+  }
+}
+
 provider "aws" {
   region = var.region
 }
 
 resource "aws_vpc" "vpc" {
   cidr_block = var.vpc_cidr_block
-  tags       = var.vpc_tags
+  tags       = local.common_tags
 }
 
 data "aws_availability_zones" "az" {
@@ -28,10 +39,12 @@ resource "aws_subnet" "subnet" {
 
 resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.vpc.id
+  tags   = local.common_tags
 }
 
 resource "aws_route_table" "route_table" {
   vpc_id = aws_vpc.vpc.id
+  tags   = local.common_tags
   route {
     cidr_block = var.route_table_cidr_block
     gateway_id = aws_internet_gateway.gw.id
@@ -47,6 +60,7 @@ resource "aws_security_group" "allow_tls" {
   name        = "allow_tls"
   description = "Allow TLS inbound traffic"
   vpc_id      = aws_vpc.vpc.id
+  tags        = local.common_tags
 }
 
 resource "aws_security_group_rule" "ingress" {
@@ -69,6 +83,7 @@ resource "aws_security_group" "allow_ssh" {
   name        = "allow_ssh"
   description = "Allow SSH access to VM"
   vpc_id      = aws_vpc.vpc.id
+  tags        = local.common_tags
 }
 
 resource "aws_security_group_rule" "ssh_ingress" {
@@ -91,6 +106,7 @@ resource "aws_security_group_rule" "ssh_egress" {
 
 resource "aws_network_acl" "network_acl" {
   vpc_id = aws_vpc.vpc.id
+  tags   = local.common_tags
 }
 
 resource "aws_network_acl_rule" "ingress" {
@@ -117,5 +133,5 @@ resource "aws_network_acl_rule" "egress" {
 
 resource "aws_network_interface" "subnet_association" {
   subnet_id       = aws_subnet.subnet.id
-  security_groups = [aws_security_group.allow_tls.id, aws_security_group.allow_ssh.id]
+  security_groups = concat([aws_security_group.allow_tls.id, aws_security_group.allow_ssh.id])
 }
