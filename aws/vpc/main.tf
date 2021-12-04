@@ -5,6 +5,7 @@ terraform {
       version = "3.64.2"
     }
   }
+  required_version="~>1.0.11"   # Terraform version
 }
 
 locals {
